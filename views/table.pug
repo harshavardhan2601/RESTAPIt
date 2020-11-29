@@ -1,0 +1,216 @@
+html
+	head
+		include main header.pug
+		script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js')
+		script(type='text/javascript', src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js')
+		link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js')
+		title student
+		style.
+			.btn-group-xs > .btn, .btn-xs {
+				font-size: .875rem;
+				line-height: .5;
+				border-radius: .2rem;
+			}
+			.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
+			padding: 12px 7px;
+			vertical-align: bottom;
+			}
+		script.
+			$(document).ready(function () {
+				var date_input = $('input[name="studentdob"]'); //our date input has the name "date"
+				var container = $('.container-fluid form').length > 0 ? $('.container-fluid form').parent() : "body";
+				console.log($('.container-fluid form').length);
+				console.log(date_input);
+				$('body').on('focus','input[name="studentdob"]',function(){
+					console.log(this);
+					$(this).datepicker({
+						format:'dd/mm/yyyy',
+						container: container,
+						todayHighlight: true,
+						autoclose: true,
+					})
+				})
+			});
+
+			
+
+	body
+		.container-fluid(style='margin-top:175px')
+			.col-md-12
+				form(action="/studentdata" method='post' id='form_data')
+					table.table.table-bordered#content
+						tbody.field_wrapper
+							tr
+								th student id
+								th student name
+								th country name
+								th state name
+								th district name
+								th mandal name
+								th village name
+								th dob
+								//- th photo
+								th action
+							for student,index in data
+								tr
+									td
+										span(id='label_studentid' + index)=student.studentid
+										span(id='input_studentid'+ index)
+										input(type="hidden" id='studentid'+index  value=student.studentid)
+										input(type='hidden', class='student_id'+index id='userId'+index, value=student._id)
+									td 
+										span(id='label_sstudentname' + index)=student.sstudentname
+										span(id='input_sstudentname'+ index)
+										input(type="hidden" id='sstudentname'+index  value=student.sstudentname)
+									td 
+										span(id='label_studentcountry' + index)=student.studentcountry
+										span(id='input_studentcountry'+ index)
+										input(type="hidden" id='studentcountry'+index  value=student.studentcountry)
+									td 
+										span(id='label_studentstate' + index)=student.studentstate
+										span(id='input_studentstate'+ index)
+										input(type="hidden" id='studentstate'+index  value=student.studentstate)
+									td 
+										span(id='label_studentdistrict' + index)=student.studentdistrict
+										span(id='input_studentdistrict'+ index)
+										input(type="hidden" id='studentdistrict'+index  value=student.studentdistrict)
+									td 
+										span(id='label_studentmandal' + index)=student.studentmandal
+										span(id='input_studentmandal'+ index)
+										input(type="hidden" id='studentmandal'+index  value=student.studentmandal)
+									td 
+										span(id='label_studentvillage' + index)=student.studentvillage
+										span(id='input_studentvillage'+ index)
+										input(type="hidden" id='studentvillage'+index  value=student.studentvillage)
+									td
+										span(id='label_studentdob' + index)=student.studentdob
+										span(id='input_studentdob'+ index)
+										input(type="hidden" id='studentdob'+index  value=student.studentdob)
+									//- td
+									//- 	-var dataimage = student.student_pic.split('||')
+									//- 		//- b=dataimage
+									//- 		for data in dataimage
+									//- 			img(src=data, width='20px',height='20px')
+									td
+										span(id='edit'+index)
+											input.btn.btn-success.btn-xs#edit(type="button", onclick='javascript:Editpage('+index+',this)', value='Edit')
+										span(id='save'+index)
+										span(id='delete'+index)
+											a.btn.btn-danger.btn-xs.text-white(href='/studentdelete/' +student._id) Delete
+							tr
+								td
+									input#sid.form-control(type='text', name='studentid')
+								td
+									input#sname.form-control(type='text', name='sstudentname')
+								td
+									input#scountry.form-control(type='text', name='studentcountry')
+								td
+									input#state.form-control(type='text', name='studentstate')
+								td
+									input#sdistrict.form-control(type='text', name='studentdistrict')
+								td
+									input#smandal.form-control(type='text', name='studentmandal')
+								td
+									input#svillage.form-control(type='text', name='studentvillage')
+								td
+									//- .pic_plugin(name='student_pic')
+									input#sdate.form-control(type='text', name='studentdob')
+								//- td
+								//- 	.pic_plugin(name='student_pic')
+									//- input#sdate.form-control(type='text', name='studentdob')
+								td
+									input#btn.btn-info(type='submit', value='Insert')
+					//- b=data
+				//- button#pr.btn.btn-light.offset-md-5(style="border:1px solid black") Print
+		script(src='/assets/js/picFile.js')
+		script.
+			var doc = new jsPDF();
+
+			$('#pr').click(function () {
+				alert('n')
+				doc.fromHTML($('#content').html(), 15, 15, {
+					'width': 170,
+				});
+				doc.save('sample-file.pdf');
+			});
+
+			function Editpage(ind,obj){
+				var cop = obj.value;
+				if(cop == 'Edit'){
+					$('#label_studentid'+ind).hide();
+					var studentid = $('#studentid'+ind).val();
+					var studentid_html = '<input class="form-control studentid'+ind+'" id="sid" type="text" name="studentid" value="'+studentid+'" />'
+					 $('#input_studentid'+ ind).html($('#input_studentid'+ ind).html() + studentid_html);
+
+					$('#label_sstudentname'+ind).hide();
+					var sstudentname = $('#sstudentname'+ind).val();
+					var sstudentname_html = '<input class="form-control sstudentname'+ind+'" id="sname" type="text" name="sstudentname" value="'+sstudentname+'" />'
+					 $('#input_sstudentname'+ ind).html($('#input_sstudentname'+ ind).html() + sstudentname_html);
+
+					$('#label_studentcountry'+ind).hide();
+					var studentcountry = $('#studentcountry'+ind).val();
+					var studentcountry_html = '<input class="form-control studentcountry'+ind+'" id="sname" type="text" name="studentcountry" value="'+studentcountry+'" />'
+					 $('#input_studentcountry'+ ind).html($('#input_studentcountry'+ ind).html() + studentcountry_html);
+
+					$('#label_studentstate'+ind).hide();
+					var studentstate = $('#studentstate'+ind).val();
+					var studentstate_html = '<input class="form-control studentstate'+ind+'" id="sname" type="text" name="studentstate" value="'+studentstate+'" />'
+					 $('#input_studentstate'+ ind).html($('#input_studentstate'+ ind).html() + studentstate_html);
+
+					$('#label_studentdistrict'+ind).hide();
+					var studentdistrict = $('#studentdistrict'+ind).val();
+					var studentdistrict_html = '<input class="form-control studentdistrict'+ind+'" id="sname" type="text" name="studentdistrict" value="'+studentdistrict+'" />'
+					 $('#input_studentdistrict'+ ind).html($('#input_studentdistrict'+ ind).html() + studentdistrict_html);
+
+					$('#label_studentmandal'+ind).hide();
+					var studentmandal = $('#studentmandal'+ind).val();
+					var studentmandal_html = '<input class="form-control studentmandal'+ind+'" id="sname" type="text" name="studentmandal" value="'+studentmandal+'" />'
+					 $('#input_studentmandal'+ ind).html($('#input_studentmandal'+ ind).html() + studentmandal_html);
+
+					$('#label_studentvillage'+ind).hide();
+					var studentvillage = $('#studentvillage'+ind).val();
+					var studentvillage_html = '<input class="form-control studentvillage'+ind+'" id="sname" type="text" name="studentvillage" value="'+studentvillage+'" />'
+					 $('#input_studentvillage'+ ind).html($('#input_studentvillage'+ ind).html() + studentvillage_html);
+
+					$('#label_studentdob'+ind).hide();
+					var studentdob = $('#studentdob'+ind).val();
+					var studentdob_html = '<input class="form-control studentdob'+ind+'" id="sdate" type="text" name="studentdob" value="'+studentdob+'" />'
+					 $('#input_studentdob'+ ind).html($('#input_studentdob'+ ind).html() + studentdob_html);
+
+
+					$('#delete'+ind).hide();
+					$('#edit'+ind).hide();
+					var save = "<input type='button' id='save'  class='btn btn-success btn-xs' value='save' onclick='javascript:updateButtons("+ind+")' />"
+					$('#save'+ind).html(save);
+					$('#save'+ind).show();
+
+				}
+			}
+
+			function updateButtons(id) {
+				var student_id = $('.student_id'+id).val();
+				var studentid = $('.studentid'+id).val();
+				var sstudentname = $('.sstudentname'+id).val();
+				var studentcountry = $('.studentcountry'+id).val();
+				var studentstate = $('.studentstate'+id).val();
+				var studentdistrict = $('.studentdistrict'+id).val();
+				var studentmandal = $('.studentmandal'+id).val();
+				var studentvillage = $('.studentvillage'+id).val();
+				var studentdob = $('.studentdob'+id).val();
+
+				var update_student ={
+					studentid:studentid,
+					sstudentname:sstudentname,
+					studentcountry:studentcountry,
+					studentstate:studentstate,
+					studentdistrict:studentdistrict,
+					studentmandal:studentmandal,
+					studentvillage:studentvillage,
+					studentdob:studentdob
+				}
+				console.log(update_student);
+				$.post('/update_student',{student_obj:update_student,_id:student_id},function(data){
+				window.location.reload();
+				});
+			}
